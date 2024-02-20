@@ -18,7 +18,7 @@ dependencies {
     implementation "org.jetbrains.lets-plot:lets-plot-image-export:2.1.0"
     implementation "org.jetbrains.lets-plot:lets-plot-kotlin-jvm:3.0.2"
 
-    // Чтоб работали преыдущие библиотеки
+    // Чтоб работали предыущие библиотеки
     implementation "org.slf4j:slf4j-api:2.0.7"
     implementation "org.slf4j:slf4j-simple:2.0.7"
 
