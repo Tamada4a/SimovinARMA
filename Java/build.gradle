@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+}
+
+dependencies {
+    // Для построения графиков
+    implementation "org.knowm.xchart:xchart:3.8.8"
+
+    // numpy для Java
+    implementation "org.nd4j:nd4j-native-platform:1.0.0-M2.1"
+
+    // Чтоб работала nd4j
+    implementation "org.slf4j:slf4j-api:2.0.7"
+    implementation "org.slf4j:slf4j-simple:2.0.7"
+
+    // Библиотека для решения систем нелинейных уравнений
+    implementation "com.github.Tamada4a:DasOptimization:1.0.1"
+}
+
+test {
+    useJUnitPlatform()
+}
