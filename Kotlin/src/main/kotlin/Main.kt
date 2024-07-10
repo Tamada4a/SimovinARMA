@@ -799,7 +799,10 @@ fun getBestOfTheBests(thEpsList: ArrayList<Double>, epsList: ArrayList<Double>, 
     val minModEpsIndex = epsList.indexOf(minModEps)
 
     val minEps = min(minThEps, minModEps)
-    val minIndex = min(minThEpsIndex, minModEpsIndex)
+    val minIndex = if (thEpsList.contains(minEps))
+        minThEpsIndex
+    else
+        minModEpsIndex
 
     val bestM = models[minIndex].first
     val bestN = models[minIndex].second
@@ -933,7 +936,7 @@ fun main(args : Array<String>) {
 
     println("Для АР($ar_m) дисперсия = $dispersionAR")
     println("Для CC($ma_n) дисперсия = $dispersionMA")
-    println("Для АРCC($arma_m, $arma_n) дисперсия = $medianARMA\n")
+    println("Для АРCC($arma_m, $arma_n) дисперсия = $dispersionARMA\n")
 
     val sko = sqrt(dispersion)
     val skoAR = sqrt(dispersionAR)
@@ -1005,7 +1008,7 @@ fun main(args : Array<String>) {
     val alphaMA = findAlphasMA(ma_n, cfListMA)
 
     //вычисляем теоретическую НКФ для СС
-    print("-----------------Теоретическая НКФ для СС-----------------\n")
+    println("-----------------Теоретическая НКФ для СС-----------------\n")
     val tNkfMAList = getTheoreticalNormalCorrelation(arrayListOf(arrayListOf(ArrayList())), alphaMA, nkfListMA, m, ma_m, ma_n, M_min, N_min, false)
     val tNkfMA = tNkfMAList[ma_m][ma_n]
 
