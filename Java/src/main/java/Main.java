@@ -23,6 +23,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+
 public class Main {
     private static final Color lightBlue = new Color(97, 159, 202);
     private static final Color blue = new Color(0, 40, 255);
@@ -778,11 +779,8 @@ public class Main {
         double minThEps = thEpsList.stream().min(Double::compare).get();
         double minModEps = epsList.stream().min(Double::compare).get();
 
-        int minThEpsIndex = thEpsList.indexOf(minThEps);
-        int minModEpsIndex = epsList.indexOf(minModEps);
-
         double minEps = Math.min(minThEps, minModEps);
-        int minIndex = thEpsList.contains(minEps) ? minThEpsIndex : minModEpsIndex;
+        int minIndex = thEpsList.contains(minEps) ? thEpsList.indexOf(minEps) : epsList.indexOf(minEps);
 
         int bestM = models.get(minIndex).get(0);
         int bestN = models.get(minIndex).get(1);
