@@ -792,17 +792,15 @@ fun plotBestNKF(sourceNKF: ArrayList<Double>, modelNKF: ArrayList<Double>, tNKFM
 
 // функция для выбора лучшей модели из моделей АР, СС и АРСС (6 задание)
 fun getBestOfTheBests(thEpsList: ArrayList<Double>, epsList: ArrayList<Double>, models: ArrayList<Pair<Int, Int>>): Int {
-    val minThEps = thEpsList.min()
+	val minThEps = thEpsList.min()
     val minModEps = epsList.min()
 
-    val minThEpsIndex = thEpsList.indexOf(minThEps)
-    val minModEpsIndex = epsList.indexOf(minModEps)
-
     val minEps = min(minThEps, minModEps)
+
     val minIndex = if (thEpsList.contains(minEps))
-        minThEpsIndex
+        thEpsList.indexOf(minEps)
     else
-        minModEpsIndex
+        epsList.indexOf(minEps)
 
     val bestM = models[minIndex].first
     val bestN = models[minIndex].second
