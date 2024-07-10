@@ -87,6 +87,9 @@ def plot2(normalCorrelation_list, m, corInt):
 
     plt.plot(normalCorrelation_list, color="r", label="Source")  # добавляем координаты на график
 
+    if corInt > m:
+        m = corInt + 5
+
     ax.set(xlim=(-0.03, m), ylim=(-1, 1))  # корректируем границы графика
 
     # подписываем оси
@@ -316,45 +319,34 @@ def ARMA_factor_generator(sequence, R, M, N):
             Rxi.append(cur_elem)
 
     factor_list = []  # список для правил
-    # print(f"Для M = {M} и N = {N}")
-    # print("Таблица 1.1 А\n")
     # генерируем правила для системы типа Таблица 1.1 А
     for n in range(N + 1):
         factor = 0
         for j in range(1, M + 1):
-            # print(f"+b[{j - 1}] * R[{abs(n - j)}]")
             factor += b[j - 1] * R[abs(n - j)]
         for i in range(n, N + 1):
-            # print(f"+a[{i}] * Rxi[{i - n}]")
             factor += a[i] * Rxi[i - n]
         factor -= R[n]
-        # print(f"-R[{n}]\n")
 
         factor_list.append(factor)
 
     # генерируем правила для системы типа Таблица 1.1 Б
-    # print("\nТаблица 1.1 Б\n")
     for i in range(1, M + 1):
         factor = 0
         for j in range(1, M + 1):
-            # print(f"+b[{j - 1}] * R[{abs(N - j + 1)}]")
             factor += b[j - 1] * R[abs(N - j + i)]
         factor -= R[N + i]
-        # print(f"-R[{N + i}]\n")
 
         factor_list.append(factor)
 
     # генерируем правила для системы типа Таблица 1.1 Г
-    # print("\nТаблица 1.1 Г\n")
     for n in range(N + 1):
         factor = 0
         m = min(n, M)
         if n > 0:
             for j in range(1, m + 1):
                 factor += b[j - 1] * Rxi[n - j]
-                # print(f"+b[{j - 1}] * Rxi[{n - j}]")
         factor += (a[n] - Rxi[n])
-        # print(f"+a[{n}] - Rxi[{n}]\n")
 
         factor_list.append(factor)
 
@@ -481,6 +473,13 @@ def generate_seq(alphas_list, betas_list, M, N, old_n, median):
     return eta_list
 
 
+# дополнительное слагаемое для значений генерируемой последовательности (5 задание)
+def getExtraME(betas, median, m, n):
+    if not betas:
+        return median
+    return median * (1 - sum(betas[m][n]))
+
+
 # графическое сравнение НКФ смоделированного и исходного СП (5 задание)
 def plot3(nkf_source, nkf_model, tNKF_model, m, name):
     fig, ax = plt.subplots(num=f"Графическая оценка НКФ модели {name}")
@@ -502,17 +501,15 @@ def plot3(nkf_source, nkf_model, tNKF_model, m, name):
 
 # выбор лучшей модели из моделей АР, СС и АРСС (6 задание)
 def best_of_the_best(eps_th_list, eps_list, models):
-    eps_th_list_clear = [i for i in eps_th_list if not i is None]
     min_th_eps = min(eps_th_list)
 
-    eps_list_clear = [i for i in eps_list if not i is None]
     min_mod_eps = min(eps_list)
 
-    min_th_index = eps_th_list.index(min_th_eps)
-    min_mod_index = eps_list.index(min_mod_eps)
-
     min_eps = min(min_th_eps, min_mod_eps)
-    min_index = min(min_th_index, min_mod_index)
+    if min_eps in eps_th_list:
+        min_index = eps_th_list.index(min_eps)
+    else:
+        min_index = eps_list.index(min_eps)
 
     best_m = models[min_index][0]
     best_n = models[min_index][1]
@@ -524,7 +521,7 @@ def best_of_the_best(eps_th_list, eps_list, models):
 
 # главная функция, откуда всё вызывается
 def main():
-    f = open('17.txt', 'r')  # открываем файл, из которого будем считывать данные
+    f = open('16.txt', 'r')  # открываем файл, из которого будем считывать данные
     start_list = [float(line) for line in f]  # заполняем список числами из файла
     length = len(start_list)
     m = 10  # задаём количество отсчётов как константу
@@ -566,14 +563,12 @@ def main():
     # получаем значения параметров альфа и бета
     print("------------Значения параметров альфа и бета------------\n")
     a_listAR, b_listAR = findAlphaBetasAR(correlation_list, M_max)
-    print(a_listAR)
-    print(f"\n{b_listAR}")
 
     # вычисляем теоретическую НКФ для АР
     print("-----------------Теоретическая НКФ для АР-----------------\n")
     theoretical_nkf_listAR = theoretical_normalCorrelation(b_listAR, [], normalCorrelation_list, m, M_max, N_min, M_min,
                                                            N_min)
-    print(theoretical_nkf_listAR)
+
     # находим эпсилон для каждой модели
     print("----------------Эпсилон для каждой модели----------------\n")
     eps_listAR = findEps(theoretical_nkf_listAR, normalCorrelation_list, m, M_max, N_min, M_min, N_min)
@@ -704,6 +699,9 @@ def main():
     print("------------Значения параметров альфа и бета------------\n")
     alphasAR, betasAR = findAlphaBetasAR(correlation_listAR, M_max)
 
+    extraMEAR = getExtraME(betasAR, median, ar_m, ar_n)
+    print(f"К значениям последовательности АР{ar_m, ar_n} необходимо добавить {extraMEAR}\n")
+
     # вычисляем теоретическую НКФ для АР
     print("-----------------Теоретическая НКФ для АР-----------------\n")
     tNKF_listAR = theoretical_normalCorrelation(betasAR, [], normalCorrelation_listAR, m, ar_m, ar_n, M_min, N_min)
@@ -721,6 +719,9 @@ def main():
     print("---------------Значения параметров альфа---------------\n")
     alphasMA = findAlphasMA(correlation_listMA, ma_n)
 
+    extraMEMA = getExtraME([], median, ma_m, ma_n)
+    print(f"К значениям последовательности СС{ma_m, ma_n} необходимо добавить {extraMEMA}\n")
+
     # вычисляем теоретическую НКФ для СС
     print("-----------------Теоретическая НКФ для СС-----------------\n")
     tNKF_listMA = theoretical_normalCorrelation([], alphasMA, normalCorrelation_listMA, m, ma_m, ma_n, M_min, N_min)
@@ -737,6 +738,9 @@ def main():
     # находим коэффициенты бета и альфа для каждой модели АРСС
     print("------------Значения параметров альфа и бета------------\n")
     alphasARMA, betasARMA = findBetasAlphasARMA(correlation_listARMA, arma_m, arma_n)
+
+    extraMEARMA = getExtraME(betasARMA, median, arma_m, arma_n)
+    print(f"К значениям последовательности АРСС{arma_m, arma_n} необходимо добавить {extraMEARMA}\n")
 
     # вычисляем теоретическую НКФ для АРСС
     print("----------------Теоретическая НКФ для АРСС----------------\n")
